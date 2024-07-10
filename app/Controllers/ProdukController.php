@@ -2,8 +2,13 @@
 
 namespace App\Controllers;
 
+namespace App\Controllers;
+
 use App\Models\ProductModel;
 use Dompdf\Dompdf;
+
+use App\Controllers\BaseController;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class ProdukController extends BaseController
 {
@@ -14,6 +19,7 @@ class ProdukController extends BaseController
     {
         $this->product = new ProductModel();
     }
+
 
     public function index()
     {
@@ -43,35 +49,36 @@ class ProdukController extends BaseController
         $this->product->insert($dataForm);
 
         return redirect('produk')->with('success', 'Data Berhasil Ditambah');
-    } 
-    public function edit($id)
-    {
-    $dataProduk = $this->product->find($id);
-
-    $dataForm = [
-        'nama' => $this->request->getPost('nama'),
-        'harga' => $this->request->getPost('harga'),
-        'jumlah' => $this->request->getPost('jumlah'),
-        'updated_at' => date("Y-m-d H:i:s")
-    ];
-
-    if ($this->request->getPost('check') == 1) {
-        if ($dataProduk['foto'] != '' and file_exists("img/" . $dataProduk['foto'] . "")) {
-            unlink("img/" . $dataProduk['foto']);
-        }
-
-        $dataFoto = $this->request->getFile('foto');
-
-        if ($dataFoto->isValid()) {
-            $fileName = $dataFoto->getRandomName();
-            $dataFoto->move('img/', $fileName);
-            $dataForm['foto'] = $fileName;
-        }
     }
 
-    $this->product->update($id, $dataForm);
+    public function edit($id)
+    {
+        $dataProduk = $this->product->find($id);
 
-    return redirect('produk')->with('success', 'Data Berhasil Diubah');
+        $dataForm = [
+            'nama' => $this->request->getPost('nama'),
+            'harga' => $this->request->getPost('harga'),
+            'jumlah' => $this->request->getPost('jumlah'),
+            'updated_at' => date("Y-m-d H:i:s")
+        ];
+
+        if ($this->request->getPost('check') == 1) {
+            if ($dataProduk['foto'] != '' and file_exists("img/" . $dataProduk['foto'] . "")) {
+                unlink("img/" . $dataProduk['foto']);
+            }
+
+            $dataFoto = $this->request->getFile('foto');
+
+            if ($dataFoto->isValid()) {
+                $fileName = $dataFoto->getRandomName();
+                $dataFoto->move('img/', $fileName);
+                $dataForm['foto'] = $fileName;
+            }
+        }
+
+        $this->product->update($id, $dataForm);
+
+        return redirect('produk')->with('success', 'Data Berhasil Diubah');
     }
 
     public function delete($id)
@@ -98,8 +105,8 @@ class ProdukController extends BaseController
         // instantiate and use the dompdf class
         $dompdf = new Dompdf();
 
-            // load HTML content
-            $dompdf->loadHtml($html);
+        // load HTML content
+        $dompdf->loadHtml($html);
 
         // (optional) setup the paper size and orientation
         $dompdf->setPaper('A4', 'potrait');

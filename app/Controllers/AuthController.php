@@ -4,13 +4,12 @@ namespace App\Controllers;
 
 use App\Controllers\BaseController;
 use CodeIgniter\HTTP\ResponseInterface;
-
 use App\Models\UserModel;
 
 class AuthController extends BaseController
 {
     protected $user;
-
+    
     function __construct()
     {
         helper('form');
@@ -21,7 +20,7 @@ class AuthController extends BaseController
 {
     if ($this->request->getPost()) {
         $rules = [
-            'username' => 'required|min_length[6]',
+            'username' => 'required|min_length[5]',
             'password' => 'required|min_length[7]|numeric',
         ];
 
@@ -60,6 +59,10 @@ class AuthController extends BaseController
     public function logout()
     {
         session()->destroy();
-        return redirect()->to('login');
+        return redirect()->to(base_url('/login'));
     }
+    // public function index()
+    // {
+    //     //
+    // }
 }

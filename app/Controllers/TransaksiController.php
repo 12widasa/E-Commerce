@@ -2,14 +2,16 @@
 
 namespace App\Controllers;
 
+use App\Controllers\BaseController;
 use App\Models\TransactionModel;
 use App\Models\TransactionDetailModel;
+use CodeIgniter\HTTP\ResponseInterface;
 
 class TransaksiController extends BaseController
 {
     protected $cart;
     protected $url = "https://api.rajaongkir.com/starter/";
-    protected $apiKey = "a3c0ce590129d70edbd27b1e1c906628";
+    protected $apiKey = "8a8073141ddb4ace76ee20437bbd4dd7";
     protected $transaction;
     protected $transaction_detail;
 
@@ -18,6 +20,8 @@ class TransaksiController extends BaseController
         helper('number');
         helper('form');
         $this->cart = \Config\Services::cart();
+        $this->transaction = new TransactionModel();
+        $this->transaction_detail = new TransactionDetailModel();
     }
 
     public function index()
@@ -72,11 +76,25 @@ class TransaksiController extends BaseController
     {
         $data['items'] = $this->cart->contents();
         $data['total'] = $this->cart->total();
-        $provinsi = $this->rajaongkir('province');//print_r($provinsi);exit;
-				$data['provinsi'] = json_decode($provinsi)->rajaongkir->results;
+        
+        $provinsi = $this->rajaongkir('province');
+        
+        if ($provinsi) {
+            $decodedProvinsi = json_decode($provinsi);
+            if (isset($decodedProvinsi->rajaongkir->results)) {
+                $data['provinsi'] = $decodedProvinsi->rajaongkir->results;
+            } else {
+                $data['provinsi'] = []; // Set to an empty array or handle the error as needed
+                log_message('error', 'Invalid response structure from Rajaongkir API');
+            }
+        } else {
+            $data['provinsi'] = []; // Set to an empty array or handle the error as needed
+            log_message('error', 'Failed to fetch data from Rajaongkir API');
+        }
 
         return view('v_checkout', $data);
     }
+
 
     public function getCity()
     {
@@ -96,43 +114,6 @@ class TransaksiController extends BaseController
             $courier = $this->request->getGet('courier');
             $data = $this->rajaongkircost($origin, $destination, $weight, $courier);
             return $this->response->setJSON($data);
-        }
-    }
-
-    public function buy()
-    {
-        if ($this->request->getPost()) { 
-            $dataForm = [
-                'username' => $this->request->getPost('username'),
-                'total_harga' => $this->request->getPost('total_harga'),
-                'alamat' => $this->request->getPost('alamat'),
-                'ongkir' => $this->request->getPost('ongkir'),
-                'status' => 0,
-                'created_at' => date("Y-m-d H:i:s"),
-                'updated_at' => date("Y-m-d H:i:s")
-            ];
-
-            $this->transaction->insert($dataForm);
-
-            $last_insert_id = $this->transaction->getInsertID();
-
-            foreach ($this->cart->contents() as $value) {
-                $dataFormDetail = [
-                    'transaction_id' => $last_insert_id,
-                    'product_id' => $value['id'],
-                    'jumlah' => $value['qty'],
-                    'diskon' => 0,
-                    'subtotal_harga' => $value['qty'] * $value['price'],
-                    'created_at' => date("Y-m-d H:i:s"),
-                    'updated_at' => date("Y-m-d H:i:s")
-                ];
-
-                $this->transaction_detail->insert($dataFormDetail);
-            }
-
-            $this->cart->destroy();
-    
-            return redirect()->to(base_url('profile'));
         }
     }
 
@@ -192,6 +173,49 @@ class TransaksiController extends BaseController
 
         curl_close($curl);
 
+        if ($err) {
+            log_message('error', 'Curl Error: ' . $err);
+            return null;
+        }
+
         return $response;
+    }
+
+
+    public function buy()
+    {
+        if ($this->request->getPost()) {
+            $dataForm = [
+                'username' => $this->request->getPost('username'),
+                'total_harga' => $this->request->getPost('total_harga'),
+                'alamat' => $this->request->getPost('alamat'),
+                'ongkir' => $this->request->getPost('ongkir'),
+                'status' => 0,
+                'created_at' => date("Y-m-d H:i:s"),
+                'updated_at' => date("Y-m-d H:i:s")
+            ];
+
+            $this->transaction->insert($dataForm);
+
+            $last_insert_id = $this->transaction->getInsertID();
+
+            foreach ($this->cart->contents() as $value) {
+                $dataFormDetail = [
+                    'transaction_id' => $last_insert_id,
+                    'product_id' => $value['id'],
+                    'jumlah' => $value['qty'],
+                    'diskon' => 0,
+                    'subtotal_harga' => $value['qty'] * $value['price'],
+                    'created_at' => date("Y-m-d H:i:s"),
+                    'updated_at' => date("Y-m-d H:i:s")
+                ];
+
+                $this->transaction_detail->insert($dataFormDetail);
+            }
+
+            $this->cart->destroy();
+
+            return redirect()->to(base_url('profile'));
+        }
     }
 }

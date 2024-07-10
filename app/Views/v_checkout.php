@@ -17,22 +17,22 @@
         <div class="col-12">
             <label for="provinsi" class="form-label">Provinsi</label>
             <select class="form-select" id="provinsi">
-    <option>Silakan pilih provinsi</option>
-    <?php foreach ($provinsi as $p) : ?>
-        <option value="<?= $p->province_id ?>"><?= $p->province ?></option>
-    <?php endforeach ?>
-</select>
+                <option>Silakan pilih provinsi</option>
+                <?php foreach ($provinsi as $p) : ?>
+                    <option value="<?= $p->province_id ?>"><?= $p->province ?></option>
+                <?php endforeach ?>
+            </select>
         </div>
         <div class="col-12">
             <label for="kabkota" class="form-label">Kab/Kota</label>
             <select class="form-select" id="kabupaten">
-                <option>Silahkan Pilih Kab/Kota</option>
+                <option>Silahkan pilih Kab/Kota</option>
             </select>
         </div>
         <div class="col-12">
             <label for="layanan" class="form-label">Layanan</label>
-            <select class="form-select" id="Service">
-                <option>Silahkan Pilih Layanan</option>
+            <select class="form-select" id="service">
+                <option>Silahkan pilih Layanan</option>
             </select>
         </div>
         <div class="col-12">
@@ -148,7 +148,7 @@
                         var text = results[i]["description"] + "(" + results[i]["service"] + ")";
                         $("#service").append($('<option>', {
                             value: results[i]["cost"][0]["value"],
-                            text: text 
+                            text: text
                         }));
                     }
                     hitungTotal();

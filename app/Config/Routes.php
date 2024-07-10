@@ -5,18 +5,18 @@ use CodeIgniter\Router\RouteCollection;
 /**
  * @var RouteCollection $routes
  */
-
-$routes->get('/', 'Home::index', ['filter' => 'auth']);
-
+$routes->get('/', 'Home::index', ['filter' => 'redirectContact']);
+// $routes->get('/produk', 'ProdukController::index');
+// $routes->get('/keranjang', 'TransaksiController::index');
 $routes->get('login', 'AuthController::login');
-$routes->post('login', 'AuthController::login', ['filter' => 'redirect']);
+$routes->post('login', 'AuthController::login');
 $routes->get('logout', 'AuthController::logout');
 
-$routes->group('produk', ['filter' => 'auth'], function ($routes) {
-    $routes->get('', 'ProdukController::index');
-    $routes->post('', 'ProdukController::create');
-    $routes->post('edit/(:any)', 'ProdukController::edit/$1'); 
-    $routes->get('delete/(:any)', 'ProdukController::delete/$1'); 
+$routes->group('/produk', ['filter' => 'auth'], function ($routes) {
+    $routes->get('','ProdukController::index');
+    $routes->post('','ProdukController::create');
+    $routes->post('edit/(:any)', 'ProdukController::edit/$1');
+    $routes->get('delete/(:any)', 'ProdukController::delete/$1');
     $routes->get('download', 'ProdukController::download');
 });
 
@@ -33,9 +33,11 @@ $routes->get('getcity', 'TransaksiController::getcity', ['filter' => 'auth']);
 $routes->get('getcost', 'TransaksiController::getcost', ['filter' => 'auth']);
 $routes->post('buy', 'TransaksiController::buy', ['filter' => 'auth']);
 
-$routes->get('faq', 'Home::faq', ['filter' => 'auth']);
+// $routes->get('/faq', 'Home::faq', ['filter' => 'auth']);
+$routes->get('/keranjang', 'TransaksiController::index', ['filter' => 'auth']);
+$routes->get('/contact', 'Home::Contacthome', ['filter' => 'auth']);
 $routes->get('profile', 'Home::profile', ['filter' => 'auth']);
-$routes->get('contact', 'Home::contact', ['filter' => 'auth']);
 
-
-
+$routes->group('api', function ($routes) {
+    $routes->post('monthly', 'ApiController::monthly');
+});
